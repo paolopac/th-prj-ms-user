@@ -1,0 +1,111 @@
+# ==============================================================
+# = User Mirco Service
+# ==============================================================
+# ==============================================================
+# = NOTE
+# ==============================================================   
+# build:
+# mvn -D maven.test.skip=true clean install
+
+# run java JAR with specific profile ID:
+# java -jar -Dspring.profiles.active=zone[n] -DMySqlIp=127.0.0.1 /*-DZuulIp=127.0.0.1 (PA: NON ATTIVO)*/ -Xmx96m -Xss512k NameApp.jar
+# example:
+# java -jar -Dspring.profiles.active=struct1 -DMySqlIp=127.0.0.1 -Xmx96m -Xss512k USER-WEB-SERVICE-0.0.1-SNAPSHOT.jar
+# ==============================================================
+# = PROFILE: struct1
+# ==============================================================
+spring:
+  application:
+    name: USER-MICRO-SERVICE
+  # sleuth: # PA: SI COMPRENDA
+  #  sampler:
+  #    probability: 1.0
+  #  traceId128: false
+# ==============================================================
+# = DBMS MySQL Parameters
+# ==============================================================
+  datasource:
+    initialization-mode: never
+    username: microService
+    password: 20240307Tp!
+    url: jdbc:mysql://127.0.0.1:3306/tarahumara?useSSL=false&useUnicode=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    hikari:
+      connection-timeout: 40000
+      max-lifetime: 40000
+      validation-timeout: 10000
+      maximum-pool-size: 10
+      test-while-idle: true
+      time-between-eviction-runs-millis: 30000
+      validation-query: "SELECT 1"
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLInnoDBDialect
+    show-sql: true
+
+server:
+  port: 8020
+
+# ==============================================================
+# = Proprietà Livello Log
+# = Default ERROR, WARN e INFO 
+# = Levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
+# ==============================================================   
+logging:
+  file:
+    name: 'logs/micro-service-user-struct1.log'
+    max-size: 10MB
+  # Livello del Log generale
+  level:
+    root: INFO 
+    # Livello di log specifico
+    # org.springframework.security: DEBUG
+    org.hibernate: INFO
+
+# ==============================================================
+# = ACTUATOR
+# ==============================================================
+management:
+  endpoints:
+    web:
+      exposure: 
+        include: "*"
+    shutdown:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+
+# ACTUATOR - INFO
+info:
+  app: @project.version@
+  env: prod
+  profile: struct1
+  author:
+    name: Paolo
+    surname: Acquaviva
+    contact: paoloacqua@hotmail.it
+
+# ==============================================================
+# = RIBBON PROPERTIES
+# ==============================================================
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+#ZUUL-API-GATEWAY:
+# ribbon:
+#    listOfServers: http://${ZuulIp}:8755
+
+# ==============================================================
+# Security JWT  
+# ===============================================================
+security:
+  url: /auth/**
+  header: Authorization
+  prefix: Bearer 
+  expiration: 86400 # 24h
+  secret: Ne1_M3zz0_d31
